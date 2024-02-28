@@ -36,7 +36,7 @@ def object_detector(image):
         pt1 = (int(x1), int(y1))
         pt2 = (int(x2), int(y2))
         # getting the data 
-        if int(detected_class) ==0 or int(detected_class) ==67 : 
+        if int(detected_class) ==0 or int(detected_class) ==67 or int(detected_class) == 56: 
             data_list.append(class_names[int(detected_class)])
             data_list.append(x2-x1)             
             data_list.append(pt1)
@@ -62,15 +62,19 @@ focal_mobile = focal_length_finder(KNOWN_DISTANCE, MOBILE_WIDTH, mobile_data[1])
 person_data = object_detector('ReferenceImagesV8/person.png')
 focal_person = focal_length_finder(KNOWN_DISTANCE, PERSON_WIDTH, person_data[1])
 
+chair_data = object_detector('ReferenceImagesV8/chair.png')
+focal_chair = focal_length_finder(KNOWN_DISTANCE, CHAIR_WIDTH, chair_data[1])
+
 print(f"type is: {mobile_data[0]} and width is {mobile_data[1]}")
 print(f"type is: {person_data[0]} and width is {person_data[1]}")
+print(f"type is: {chair_data[0]} and width is {chair_data[1]}")
 
 cap = cv.VideoCapture(0)
 while True:
     ret, frame = cap.read()
     data = object_detector(frame) 
     for i in range(0 , len(data) , 5):
-        if data[i + 0] =='cell phone' or data[i + 0] =='person'  :
+        if data[i + 0] =='cell phone' or data[i + 0] =='person' or data[i + 0] == 'chair' :
             if data[i + 0] =='cell phone' :
                 distance = distance_finder (focal_mobile, MOBILE_WIDTH, data[i + 1])
             elif data[i + 0] =='person' :   
@@ -79,9 +83,9 @@ while True:
             pt2 = data[i + 3]
             color= COLORS[data[i + 4] % len(COLORS)]
             cv.rectangle(frame, pt1, pt2,color,2)
-            cv.rectangle(frame, (pt1[0], pt1[1]-3), (pt2[0], pt1[1]+23),BLACK,-1 )
-            cv.putText(frame, f'Dis: {round(distance,2)} inch', (pt1[0]+5,pt1[1]+13), FONTS, 0.48, GREEN , 2 )
-
+            cv.rectangle(frame, (pt1[0], pt1[1]-3), (pt2[0], pt1[1]+30),BLACK,-1 )
+            cv.putText(frame, f'{data[i + 0]}', (pt1[0]+5,pt1[1]+13), FONTS, 0.48, GREEN , 2 )   
+            cv.putText(frame, f'Dis: {round(distance,2)} inch', (pt1[0]+5,pt1[1]+30), FONTS, 0.48, GREEN , 2 )     
     cv.imshow('frame',frame)
     key = cv.waitKey(1)
     if key ==ord('q'):
