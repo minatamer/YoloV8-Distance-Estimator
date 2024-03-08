@@ -20,6 +20,7 @@ FONTS = cv.FONT_HERSHEY_COMPLEX
 
 model = YOLO("yolov8n.pt")
 url = "http://192.168.1.3:8080/shot.jpg"
+#url = "http://172.20.10.3:8080/shot.jpg"
 
 class_names = []
 with open("classes.txt", "r") as f:
@@ -81,7 +82,7 @@ while True:
     img = imutils.resize(img, width=800, height=600)
     data = object_detector(img) 
     for i in range(0 , len(data) , 5):
-        if data[i + 0] =='cell phone' or data[i + 0] =='person' or data[i + 0] == 'chair' :
+        if data[i + 0] =='cell phone' or data[i + 0] =='person'  :
             if data[i + 0] =='cell phone' :
                 distance = distance_finder (focal_mobile, MOBILE_WIDTH, data[i + 1])
             elif data[i + 0] =='person' :   
