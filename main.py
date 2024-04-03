@@ -8,6 +8,9 @@ MOBILE_WIDTH = 3.0 #INCHES
 CHAIR_WIDTH = 24.0 #INCHES
 BOTTLE_WIDTH = 2.0 #INCHES #44.8 pixels
 TABLE_WIDTH = 42.0 #INCHES #942.2 pixels
+DOOR_CLOSED_WIDTH = 31.5 #INCHES #706.5 pixels
+DOOR_OPENED_WIDTH = 35.4 #INCHES #794 pixels
+
 
 # colors for object detected
 COLORS = [(255,0,0),(255,0,255),(0, 255, 255), (255, 255, 0), (0, 255, 0), (255, 0, 0)]
@@ -16,12 +19,42 @@ BLACK =(0,0,0)
 # defining fonts 
 FONTS = cv.FONT_HERSHEY_COMPLEX
 
-model = YOLO("yolov8n.pt")
+# model = YOLO("yolov8n.pt")
+model = YOLO("best.pt")
+
+# class_names = []
+# with open("classes.txt", "r") as f:
+#     class_names = [cname.strip() for cname in f.readlines()]
 
 class_names = []
-with open("classes.txt", "r") as f:
+with open("classes_new.txt", "r") as f:
     class_names = [cname.strip() for cname in f.readlines()]
 
+# def object_detector(image):
+#     results = model.predict(source = image , verbose=False)
+#     boxes = results[0].boxes.xyxy.tolist()
+#     classes = results[0].boxes.cls.tolist()
+#     names = results[0].names
+#     confidences = results[0].boxes.conf.tolist()
+#     # creating empty list to add objects data
+#     data_list =[]
+#     for box, cls, conf in zip(boxes, classes, confidences):
+#         x1, y1, x2, y2 = box
+#         confidence = conf
+#         detected_class = cls
+#         pt1 = (int(x1), int(y1))
+#         pt2 = (int(x2), int(y2))
+#         # getting the data 
+#         if int(detected_class) ==0 or int(detected_class) ==67 or int(detected_class) == 56 or int(detected_class) == 39 or int(detected_class) == 60: 
+#             data_list.append(class_names[int(detected_class)])
+#             data_list.append(x2-x1)             
+#             data_list.append(pt1)
+#             data_list.append(pt2)
+#             data_list.append(int(detected_class))
+#         # returning list containing the object data. 
+#     return data_list
+
+#Using new dataset
 def object_detector(image):
     results = model.predict(source = image , verbose=False)
     boxes = results[0].boxes.xyxy.tolist()
@@ -37,7 +70,7 @@ def object_detector(image):
         pt1 = (int(x1), int(y1))
         pt2 = (int(x2), int(y2))
         # getting the data 
-        if int(detected_class) ==0 or int(detected_class) ==67 or int(detected_class) == 56 or int(detected_class) == 39 or int(detected_class) == 60: 
+        if int(detected_class) ==1 or int(detected_class) ==7 or int(detected_class) == 10 or int(detected_class) == 3 or int(detected_class) == 4: 
             data_list.append(class_names[int(detected_class)])
             data_list.append(x2-x1)             
             data_list.append(pt1)
@@ -57,8 +90,8 @@ def distance_finder(focal_length, real_object_width, width_in_frmae):
     distance = (real_object_width * focal_length) / width_in_frmae
     return distance
 
-mobile_data = object_detector('ReferenceImagesV8/cellphone.png')
-focal_mobile = focal_length_finder(KNOWN_DISTANCE, MOBILE_WIDTH, mobile_data[1])
+# mobile_data = object_detector('ReferenceImagesV8/cellphone.png')
+# focal_mobile = focal_length_finder(KNOWN_DISTANCE, MOBILE_WIDTH, mobile_data[1])
 
 person_data = object_detector('ReferenceImagesV8/person.png')
 focal_person = focal_length_finder(KNOWN_DISTANCE, PERSON_WIDTH, person_data[1])
@@ -68,35 +101,41 @@ focal_chair = focal_length_finder(KNOWN_DISTANCE, CHAIR_WIDTH, chair_data[1])
 
 #bottle_data = object_detector('ReferenceImagesV8/chair.png')
 #focal_bottle = focal_length_finder(KNOWN_DISTANCE, BOTTLE_WIDTH, bottle_data[1])
-bottle_data = 44.8
-focal_bottle = focal_length_finder(KNOWN_DISTANCE, BOTTLE_WIDTH, bottle_data)
+# bottle_data = 44.8
+# focal_bottle = focal_length_finder(KNOWN_DISTANCE, BOTTLE_WIDTH, bottle_data)
 
 table_data = 942.2
 focal_table = focal_length_finder(KNOWN_DISTANCE, TABLE_WIDTH, table_data)
 
-print(f"type is: {mobile_data[0]} and width is {mobile_data[1]}")
+door_closed_data = 706.5
+focal_door_closed = focal_length_finder(KNOWN_DISTANCE, DOOR_CLOSED_WIDTH, door_closed_data)
+
+door_opened_data = 794
+focal_door_opened = focal_length_finder(KNOWN_DISTANCE, DOOR_OPENED_WIDTH, door_opened_data)
+
+# print(f"type is: {mobile_data[0]} and width is {mobile_data[1]}")
 print(f"type is: {person_data[0]} and width is {person_data[1]}")
 print(f"type is: {chair_data[0]} and width is {chair_data[1]}")
 #print(f"type is: {bottle_data[0]} and width is {bottle_data[1]}")
-print(f"type is: bottle and width is {bottle_data}")
-print(f"type is: diningtable and width is {table_data}")
+# print(f"type is: bottle and width is {bottle_data}")
+print(f"type is: table and width is {table_data}")
 
 cap = cv.VideoCapture(0)
 while True:
     ret, frame = cap.read()
     data = object_detector(frame) 
     for i in range(0 , len(data) , 5):
-        if data[i + 0] =='cell phone' or data[i + 0] =='person' or data[i + 0] == 'chair' or data[i + 0] == 'bottle' or data[i + 0] == 'diningtable' :
-            if data[i + 0] =='cell phone' :
-                distance = distance_finder (focal_mobile, MOBILE_WIDTH, data[i + 1])
-            elif data[i + 0] =='person' :   
+        if data[i + 0] =='person' or data[i + 0] == 'chair' or data[i + 0] == 'table' or data[i + 0] == 'door_closed' or data[i + 0] == 'door_open' :
+            if data[i + 0] =='person' :   
                 distance = distance_finder (focal_person, PERSON_WIDTH, data[i + 1]) 
             elif data[i + 0] =='chair' :   
                 distance = distance_finder (focal_chair, CHAIR_WIDTH, data[i + 1]) 
-            elif data[i + 0] =='bottle' :   
-                distance = distance_finder (focal_bottle, BOTTLE_WIDTH, data[i + 1]) 
-            elif data[i + 0] =='diningtable' :   
-                distance = distance_finder (focal_bottle, BOTTLE_WIDTH, data[i + 1]) 
+            elif data[i + 0] =='table' :   
+                distance = distance_finder (focal_table, TABLE_WIDTH, data[i + 1]) 
+            elif data[i + 0] =='door_closed' :   
+                distance = distance_finder (focal_door_closed, DOOR_CLOSED_WIDTH, data[i + 1]) 
+            elif data[i + 0] =='door_open' :   
+                distance = distance_finder (focal_door_opened, DOOR_OPENED_WIDTH, data[i + 1]) 
             pt1 = data[i + 2]
             pt2 = data[i + 3]
             color= COLORS[data[i + 4] % len(COLORS)]

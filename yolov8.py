@@ -1,3 +1,3 @@
 from ultralytics import YOLO
-model = YOLO("yolov8n.pt")
+model = YOLO("best.pt")
 model.predict(source='0' , show=True, verbose=False)
