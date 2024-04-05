@@ -30,31 +30,6 @@ class_names = []
 with open("classes_new.txt", "r") as f:
     class_names = [cname.strip() for cname in f.readlines()]
 
-# def object_detector(image):
-#     results = model.predict(source = image , verbose=False)
-#     boxes = results[0].boxes.xyxy.tolist()
-#     classes = results[0].boxes.cls.tolist()
-#     names = results[0].names
-#     confidences = results[0].boxes.conf.tolist()
-#     # creating empty list to add objects data
-#     data_list =[]
-#     for box, cls, conf in zip(boxes, classes, confidences):
-#         x1, y1, x2, y2 = box
-#         confidence = conf
-#         detected_class = cls
-#         pt1 = (int(x1), int(y1))
-#         pt2 = (int(x2), int(y2))
-#         # getting the data 
-#         if int(detected_class) ==0 or int(detected_class) ==67 or int(detected_class) == 56 or int(detected_class) == 39 or int(detected_class) == 60: 
-#             data_list.append(class_names[int(detected_class)])
-#             data_list.append(x2-x1)             
-#             data_list.append(pt1)
-#             data_list.append(pt2)
-#             data_list.append(int(detected_class))
-#         # returning list containing the object data. 
-#     return data_list
-
-#Using new dataset
 def object_detector(image):
     results = model.predict(source = image , verbose=False)
     boxes = results[0].boxes.xyxy.tolist()
@@ -70,6 +45,7 @@ def object_detector(image):
         pt1 = (int(x1), int(y1))
         pt2 = (int(x2), int(y2))
         # getting the data 
+        # if int(detected_class) ==0 or int(detected_class) ==67 or int(detected_class) == 56 or int(detected_class) == 39 or int(detected_class) == 60: 
         if int(detected_class) ==1 or int(detected_class) ==7 or int(detected_class) == 10 or int(detected_class) == 3 or int(detected_class) == 4: 
             data_list.append(class_names[int(detected_class)])
             data_list.append(x2-x1)             
@@ -90,8 +66,8 @@ def distance_finder(focal_length, real_object_width, width_in_frmae):
     distance = (real_object_width * focal_length) / width_in_frmae
     return distance
 
-# mobile_data = object_detector('ReferenceImagesV8/cellphone.png')
-# focal_mobile = focal_length_finder(KNOWN_DISTANCE, MOBILE_WIDTH, mobile_data[1])
+mobile_data = object_detector('ReferenceImagesV8/cellphone.png')
+focal_mobile = focal_length_finder(KNOWN_DISTANCE, MOBILE_WIDTH, mobile_data[1])
 
 person_data = object_detector('ReferenceImagesV8/person.png')
 focal_person = focal_length_finder(KNOWN_DISTANCE, PERSON_WIDTH, person_data[1])
@@ -99,10 +75,8 @@ focal_person = focal_length_finder(KNOWN_DISTANCE, PERSON_WIDTH, person_data[1])
 chair_data = object_detector('ReferenceImagesV8/chair.png')
 focal_chair = focal_length_finder(KNOWN_DISTANCE, CHAIR_WIDTH, chair_data[1])
 
-#bottle_data = object_detector('ReferenceImagesV8/chair.png')
-#focal_bottle = focal_length_finder(KNOWN_DISTANCE, BOTTLE_WIDTH, bottle_data[1])
-# bottle_data = 44.8
-# focal_bottle = focal_length_finder(KNOWN_DISTANCE, BOTTLE_WIDTH, bottle_data)
+bottle_data = 44.8
+focal_bottle = focal_length_finder(KNOWN_DISTANCE, BOTTLE_WIDTH, bottle_data)
 
 table_data = 942.2
 focal_table = focal_length_finder(KNOWN_DISTANCE, TABLE_WIDTH, table_data)
@@ -125,6 +99,17 @@ while True:
     ret, frame = cap.read()
     data = object_detector(frame) 
     for i in range(0 , len(data) , 5):
+        # if data[i + 0] =='cell phone' or data[i + 0] =='person' or data[i + 0] == 'chair' or data[i + 0] == 'bottle' or data[i + 0] == 'diningtable' :
+        #     if data[i + 0] =='cell phone' :
+        #         distance = distance_finder (focal_mobile, MOBILE_WIDTH, data[i + 1])
+        #     elif data[i + 0] =='person' :  
+        #         distance = distance_finder (focal_person, PERSON_WIDTH, data[i + 1]) 
+        #     elif data[i + 0] =='chair' :   
+        #         distance = distance_finder (focal_chair, CHAIR_WIDTH, data[i + 1]) 
+        #     elif data[i + 0] =='bottle' :   
+        #         distance = distance_finder (focal_bottle, BOTTLE_WIDTH, data[i + 1]) 
+        #     elif data[i + 0] =='diningtable' :   
+        #         distance = distance_finder (focal_bottle, BOTTLE_WIDTH, data[i + 1]) 
         if data[i + 0] =='person' or data[i + 0] == 'chair' or data[i + 0] == 'table' or data[i + 0] == 'door_closed' or data[i + 0] == 'door_open' :
             if data[i + 0] =='person' :   
                 distance = distance_finder (focal_person, PERSON_WIDTH, data[i + 1]) 
